@@ -1,0 +1,16 @@
+{
+  "dependencies":{
+    "underscore":"1.5.2",
+    "mongodb":"2.2.11",
+    "assert":"1.4.1",
+    "mocha":"3.1.2"
+  },
+  "devDependencies":{
+    "gulp":"3.9.1",
+    "gulp-mocha":"3.0.1"
+  },
+  "scripts":{
+    "test-sample-code":"mocha sample-code/test-with-mocha.js",
+    "watch":"gulp watch"
+  }
+}
