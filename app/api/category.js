@@ -4,35 +4,25 @@ var bodyParser = require('body-parser');
 
 module.exports = function(wagner){
   var router = express.Router();
-  var jsonParser = bodyParser.json();
-  var urlencodeParser = bodyParser.urlencoded({ extended : true });
 
-  router.use(function(req, res, next){
-    console.log("Time:" , Date.Now);
-  });
+  router.use(bodyParser.json());
 
   router.get('/category',function(req,res){
-    res.sendStatus(httpStatus.OK);
-    res.send("I am here!");
+    res
+    .status(httpStatus.OK)
+    .send("I am here!");
   });
 
-  router.post('/category',urlencodeParser,wagner.invoke(function(Category){
+  router.put('/category',wagner.invoke(function(Category){
     return function(req,res){
+
       if(!req.body) return res.sendStatus(httpStatus.BAD_REQUEST);
 
-      var category = new Category({
-        _id: req.body._id,
-        parent: req.body.parent,
-        ancestors: req.body.ancestors
-      });
-
-      category.save(function(error){
+      Category.insertMany(req.body,function(error,categories){
         if(error){
-          res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
-          res.send("Error creando categoria");
+          res.status(httpStatus.INTERNAL_SERVER_ERROR).send("Error creando categoria");
         }else{
-          res.sendStatus(httpStatus.CREATED);
-          res.send("Categoria creada");
+            res.status(httpStatus.CREATED).send("Categoria creada");
         }
       });
     };

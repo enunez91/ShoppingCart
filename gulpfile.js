@@ -3,7 +3,7 @@ var mocha = require('gulp-mocha');
 
 gulp.task('MyTest',function(){
   gulp
-    .src('sample-code/test-with-mocha.js')
+    .src('app/test/index.js')
     .pipe(mocha())
     .on('error',function(error){
       this.emit('end');
@@ -11,5 +11,5 @@ gulp.task('MyTest',function(){
 });
 
 gulp.task('watch',function(){
-  gulp.watch('./sample-code/*.js',['MyTest']);
+  gulp.watch('./app/*/*.js',['MyTest']);
 });

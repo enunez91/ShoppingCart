@@ -8,46 +8,57 @@ var connection = require('../settings/connectionString');
 
 describe('Category API',function(){
   var server;
+  var Category;
 
   before(function(){
     var app = express();
 
-    require('../models/category')(wagner);
+    var models = require('../models/category')(wagner);
     app.use(require('../api/category')(wagner));
 
     server = app.listen(connection.SERVER_PORT);
+
+    Category = models.Category;
   });
 
   after(function(){
     server.close();
   });
 
-  describe('Server', function(){
-    it('#request.get(\'/category\')',function(){
-      superagent.get('/category').end(function(error,res){
-          test.ifError(error);
-          test.equal(res.status,httpStatus.OK);
-          test.equal(res.text,'I am here!');
-          done();
-      });
-    });
-
-    it('#request.post(\'/category\')',function(){
-      var category = [
-        { _id:"Fiat" },
-        { _id:"Palio", parent:"Fiat"},
-        { _id:"Uno", parent:"Fiat"}
-      ];
-
-      superagent.post('/category')
-      .send(category)
-      .set('Content-Type', 'application/json')
-      .end(function(error,res){
-        test.ifError(error);
-        test.equal(res.status,httpStatus.CREATED);
-        done();
-      });
+  beforeEach(function(done) {
+    Category.remove({}, function(error) {
+      test.ifError(error);
+      done();
     });
   });
 
+  it('#request.get(\'/category\')',function(done){
+    var url = connection.SERVER_URL_ROOT + '/category';
+    superagent.get(url).end(function(error,res){
+        test.ifError(error);
+        test.equal(res.status,httpStatus.OK);
+        test.equal(res.text,'I am here!');
+        done()
+    });
+  });
+
+  it('#request.put(\'/category\')',function(done){
+    var category = [
+      { _id:"Fiat" },
+      { _id:"Palio", parent:"Fiat"},
+      { _id:"Uno", parent:"Fiat"}
+    ];
+
+    var url = connection.SERVER_URL_ROOT + '/category';
+
+    superagent.put(url)
+    .send(category)
+    .type('json')
+    .set('Accept', 'application/json')
+    .end(function(error,res){
+      test.ifError(error);
+      test.equal(res.status,httpStatus.CREATED);
+      done();
+    });
+  });
 });

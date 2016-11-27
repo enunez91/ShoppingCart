@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var connection = require('../settings/connectionString')
 module.exports = function(wagner){
   mongoose.connect(connection.DATABASE_URL_ROOT);
-  var model = mongoose.model('Category',require('../schema/category'));
+  var model = mongoose.model('Category',require('../schema/category'),'categories');
   wagner.factory('Category',function(){
     return model;
   });
