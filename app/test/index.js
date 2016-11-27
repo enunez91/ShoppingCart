@@ -13,7 +13,6 @@ describe('Category API',function(){
     var app = express();
 
     require('../models/category')(wagner);
-
     app.use(require('../api/category')(wagner));
 
     server = app.listen(connection.SERVER_PORT);
@@ -30,6 +29,23 @@ describe('Category API',function(){
           test.equal(res.status,httpStatus.OK);
           test.equal(res.text,'I am here!');
           done();
+      });
+    });
+
+    it('#request.post(\'/category\')',function(){
+      var category = [
+        { _id:"Fiat" },
+        { _id:"Palio", parent:"Fiat"},
+        { _id:"Uno", parent:"Fiat"}
+      ];
+
+      superagent.post('/category')
+      .send(category)
+      .set('Content-Type', 'application/json')
+      .end(function(error,res){
+        test.ifError(error);
+        test.equal(res.status,httpStatus.CREATED);
+        done();
       });
     });
   });
