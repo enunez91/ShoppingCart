@@ -22,17 +22,13 @@ describe('Category API',function(){
   });
 
   after(function(){
+    Category.remove({}, function(error) {
+      test.ifError(error);
+    });
     server.close();
   });
 
-  beforeEach(function(done) {
-    Category.remove({}, function(error) {
-      test.ifError(error);
-      done();
-    });
-  });
-
-  it('#request.get(\'/category\')',function(done){
+  it('Get category home',function(done){
     var url = connection.SERVER_URL_ROOT + '/category';
     superagent.get(url).end(function(error,res){
         test.ifError(error);
@@ -42,7 +38,7 @@ describe('Category API',function(){
     });
   });
 
-  it('#request.put(\'/category\')',function(done){
+  it('Create category',function(done){
     var category = [
       { _id:"Fiat" },
       { _id:"Palio", parent:"Fiat"},
@@ -59,6 +55,17 @@ describe('Category API',function(){
       test.ifError(error);
       test.equal(res.status,httpStatus.CREATED);
       done();
+    });
+  });
+
+  it('Get category by id',function(done){
+    var url = connection.SERVER_URL_ROOT + '/category/id/Fiat';
+    superagent
+    .get(url)
+    .end(function(error,res){
+        test.ifError(error);
+        test.equal(res.status,httpStatus.OK);
+        done()
     });
   });
 });
