@@ -8,12 +8,25 @@ var productSchema = {
     amount:{ type:Number, required:true },
     currency:{
       type:String,
-      enum:['USD','EUR','GBP'],
+      enum:['USD','VEF'],
       required:true
     }
   },
   category:cat.categorySchema
 };
 
-module.exports = new mongoose.Schema(productSchema);
+var schema = new mongoose.Schema(productSchema);
+
+var currencySymbol = {
+  'USD':'$',
+  'VEF':'Bs'
+};
+
+
+schema.virtual('displayPrice').get(function(){
+  return currencySymbol[this.price.currency] +
+         this.price.amount;
+});
+
+module.exports = schema;
 module.exports.productSchema = productSchema;
