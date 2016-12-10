@@ -1,6 +1,7 @@
 var express = require('express');
 var httpStatus = require('http-status');
 var bodyParser = require('body-parser');
+var resultHandle = require('./resultHandle.js');
 
 module.exports = function(wagner){
   var router = express.Router();
@@ -30,19 +31,7 @@ module.exports = function(wagner){
 
   router.get('/category/id/:id',wagner.invoke(function(Category){
     return function(req, res){
-      Category.findOne({ _id: req.params.id },function(error,category){
-        if(error){
-          return res
-                  .status(httpStatus.INTERNAL_SERVER_ERROR)
-                  .json({ error: error.toString() });
-        }
-        if(!category){
-          return res
-                  .status(httpStatus.NOT_FOUND)
-                  .json({ error: httpStatus[404] });
-        }
-        res.status(httpStatus.OK).json({ category:category });
-      });
+      Category.findOne({ _id: req.params.id }, resultHandle.One.bind(null,'category',res));
     };
   }));
 
