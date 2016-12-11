@@ -28,9 +28,13 @@ module.exports = function(wagner){
       if(!req.body) return res.sendStatus(httpStatus.BAD_REQUEST);
       Product.insertMany(req.body,function(error,products){
         if(error){
-          res.status(httpStatus.INTERNAL_SERVER_ERROR).send("Error creando productos");
+          res
+          .status(httpStatus.INTERNAL_SERVER_ERROR)
+          .send("Error creando productos");
         }else{
-            res.status(httpStatus.CREATED).send("Productos creadados");
+            res
+            .status(httpStatus.CREATED)
+            .send("Productos creadados");
         }
       });
     };

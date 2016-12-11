@@ -10,20 +10,45 @@ describe('Test API',function(){
   var server;
   var Category;
   var Product;
+  var User;
 
   before(function(){
     var app = express();
 
     var models = require('../api/models')(wagner);
 
-    app.use(require('../api/category')(wagner));
-    app.use(require('../api/product')(wagner));
-
-    server = app.listen(connection.SERVER_PORT);
-
     Category = models.Category;
     Product = models.Product;
+    User = models.User;
 
+    app.use(require('../api/category')(wagner));
+    app.use(require('../api/product')(wagner));
+    app.use(require('../api/user')(wagner));
+    app.use(function(req,res,next){
+      User.findOne({},function(error,user){
+        test.ifError(error);
+        req.user = user;
+      });
+      next();
+    });
+
+    server = app.listen(connection.SERVER_PORT);
+  });
+
+  before(function(done){
+    var users = [{
+      profile: {
+        username: 'enunez'
+      },
+      data: {
+        oauth: 'invalid',
+        cart: []
+      }
+    }];
+    User.insertMany(users,function(error,docs){
+      test.ifError(error);
+      done();
+    });
   });
 
   after(function(){
@@ -31,6 +56,9 @@ describe('Test API',function(){
       test.ifError(error);
     });
     Product.remove({}, function(error) {
+      test.ifError(error);
+    });
+    User.remove({}, function(error){
       test.ifError(error);
     });
     server.close();
@@ -113,6 +141,36 @@ describe('Test API',function(){
       test.ifError(error);
       test.equal(res.status,httpStatus.CREATED);
       done();
+    });
+  });
+
+  it('Get product by id',function(done){
+    var url = connection.SERVER_URL_ROOT + '/product/id/';
+    Product.findOne({},function(error,doc){
+      test.ifError(error);
+      superagent.get(url + doc.id)
+      .end(function(error,res){
+          test.ifError(error);
+          test.equal(res.status,httpStatus.OK);
+          done()
+      });
+    });
+  });
+
+  it('Get products by category id',function(done){
+    var url = connection.SERVER_URL_ROOT + '/product/category/';
+    Category.findOne({ _id:'Android'},function(error,doc){
+      test.ifError(error);
+      superagent.get(url + doc.id)
+      .end(function(error,res){
+        test.ifError(error);
+        var result;
+        test.doesNotThrow(function() {
+          result = JSON.parse(res.text).products;
+        });
+        test.equal(2,result.length);
+        done();
+      });
     });
   });
 });
