@@ -25,7 +25,7 @@ module.exports = function(wagner){
           .status(httpStatus.INTERNAL_SERVER_ERROR)
           .json({error:error.toString()});
         }
-        return res.json({user:user});
+        return res.status(httpStatus.CREATED).json({user:user});
       });
     };
   }));

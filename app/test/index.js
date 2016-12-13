@@ -21,16 +21,17 @@ describe('Test API',function(){
     Product = models.Product;
     User = models.User;
 
-    app.use(require('../api/category')(wagner));
-    app.use(require('../api/product')(wagner));
-    app.use(require('../api/user')(wagner));
     app.use(function(req,res,next){
       User.findOne({},function(error,user){
         test.ifError(error);
         req.user = user;
+        next();
       });
-      next();
     });
+
+    app.use(require('../api/category')(wagner));
+    app.use(require('../api/product')(wagner));
+    app.use(require('../api/user')(wagner));
 
     server = app.listen(connection.SERVER_PORT);
   });
@@ -173,4 +174,58 @@ describe('Test API',function(){
       });
     });
   });
+
+  it('Create user cart',function(done){
+    var url = connection.SERVER_URL_ROOT + '/product/category/';
+    Category.findOne({ _id:'Android'},function(error,doc){
+      test.ifError(error);
+      superagent.get(url + doc.id)
+      .end(function(error,res){
+        test.ifError(error);
+        var result;
+        test.doesNotThrow(function() {
+          result = JSON.parse(res.text).products;
+        });
+        test.equal(2,result.length);
+        url = connection.SERVER_URL_ROOT + '/me/cart';
+        superagent.put(url)
+        .send({
+          data:
+          {
+            cart:
+            [
+              {
+                product:result[0].id
+              },
+              {
+                product:result[1].id
+              }
+            ]
+        }})
+        .type('json')
+        .set('Accept', 'application/json')
+        .end(function(error,res){
+          test.ifError(error);
+          test.equal(res.status,httpStatus.CREATED);
+          done();
+        });
+      });
+    });
+  });
+
+  it('Get user cart',function(done){
+    var url = connection.SERVER_URL_ROOT + '/me';
+    superagent.get(url)
+    .end(function(error,res){
+      test.ifError(error);
+      test.equal(res.status,httpStatus.OK);
+      var result;
+      test.doesNotThrow(function() {
+        result = JSON.parse(res.text).user;
+      });
+      test.equal(2,result.data.cart.length);
+      done();
+    });
+  });
+
 });
