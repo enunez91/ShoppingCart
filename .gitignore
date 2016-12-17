@@ -3,3 +3,4 @@ node_modules
 npm-install.bat
 mongo-connect.bat
 data
+.env
