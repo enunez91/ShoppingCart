@@ -22,6 +22,16 @@ module.exports = function(wagner){
       };
   }));
 
+  //get products by name
+  router.get('/product/text/:query',wagner.invoke(function(Product){
+    return function(req,res){
+      Product.find({
+        $text:{ $search: req.params.query }
+      })
+      .exec(resultHandle.Many.bind(null,'products',res));
+    };
+  }));
+
   //create product
   router.put('/product',wagner.invoke(function(Product){
     return function(req,res){

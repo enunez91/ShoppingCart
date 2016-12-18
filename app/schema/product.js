@@ -28,5 +28,7 @@ schema.virtual('displayPrice').get(function(){
          this.price.amount;
 });
 
+schema.index({ name:'text'});
+
 module.exports = schema;
 module.exports.productSchema = productSchema;

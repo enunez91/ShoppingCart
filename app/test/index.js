@@ -162,6 +162,21 @@ describe('Test API',function(){
     });
   });
 
+  it('Get products by name',function(done){
+    var url = connection.SERVER_URL_ROOT + '/product/text/mini';
+    superagent.get(url)
+    .end(function(error,res){
+      test.ifError(error);
+      test.equal(res.status,httpStatus.OK);
+      var result;
+      test.doesNotThrow(function() {
+        result = JSON.parse(res.text).products;
+      });
+      test.equal(1,result.length);
+      done()
+    });
+  });
+
   it('Get products by category id',function(done){
     var url = connection.SERVER_URL_ROOT + '/product/category/';
     Category.findOne({ _id:'Android'},function(error,doc){
