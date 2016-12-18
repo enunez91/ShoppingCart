@@ -11,15 +11,18 @@ describe('Test API',function(){
   var Category;
   var Product;
   var User;
+  var Stripe;
 
   before(function(){
     var app = express();
 
     var models = require('../api/models')(wagner);
+    var dependencies = require('../api/dependencies')(wagner);
 
     Category = models.Category;
     Product = models.Product;
     User = models.User;
+    Stripe = dependencies.Stripe;
 
     app.use(function(req,res,next){
       User.findOne({},function(error,user){
@@ -32,6 +35,7 @@ describe('Test API',function(){
     app.use(require('../api/category')(wagner));
     app.use(require('../api/product')(wagner));
     app.use(require('../api/user')(wagner));
+    app.use(require('../api/stripe')(wagner));
 
     server = app.listen(connection.SERVER_PORT);
   });
@@ -195,10 +199,10 @@ describe('Test API',function(){
             cart:
             [
               {
-                product:result[0].id
+                product:result[0]._id
               },
               {
-                product:result[1].id
+                product:result[1]._id
               }
             ]
         }})
@@ -225,6 +229,47 @@ describe('Test API',function(){
       });
       test.equal(2,result.data.cart.length);
       done();
+    });
+  });
+
+  it('User checkout',function(done){
+    this.timeout(0);
+    var url = connection.SERVER_URL_ROOT + '/me';
+    superagent.get(url)
+    .end(function(error,res){
+      test.ifError(error);
+      test.equal(res.status,httpStatus.OK);
+      var result;
+      test.doesNotThrow(function() {
+        result = JSON.parse(res.text).user;
+      });
+      test.equal(2,result.data.cart.length);
+      url = connection.SERVER_URL_ROOT + '/checkout';
+      superagent.post(url)
+      .send({
+        stripeToken:{
+          number:'4242424242424242',
+          exp_month:'07',
+          exp_year:'21',
+          cvc:'123'
+        }
+      })
+      .set('Accept', 'application/json')
+      .end(function(error,res){
+        test.ifError(error);
+        test.equal(res.status, httpStatus.OK);
+        var result;
+        test.doesNotThrow(function() {
+          result = JSON.parse(res.text);
+        });
+        test.ok(result.id);
+        Stripe.charges.retrieve(result.id, function(error, charge) {
+          test.ifError(error);
+          test.ok(charge);
+          test.equal(charge.amount, 1500 * 100);
+          done();
+        });
+      });
     });
   });
 

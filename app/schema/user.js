@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose') , Schema = mongoose.Schema;
 
 module.exports = new mongoose.Schema({
   profile:{
@@ -16,8 +16,7 @@ module.exports = new mongoose.Schema({
     oauth:{ type: String, required: true },
     cart: [{
         product:{
-          type:mongoose.Schema.Types.ObjectId,
-          ref:'Product'
+          type:Schema.Types.ObjectId
         },
         quantity:{
           type: Number,
